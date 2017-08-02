@@ -139,7 +139,9 @@ def testPairings():
                           frozenset([id2, id8]), frozenset([id4, id6]),
                           frozenset([id4, id8]), frozenset([id6, id8])
                           ])
+    print possible_pairs 
     actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4]), frozenset([pid5, pid6]), frozenset([pid7, pid8])])
+    print actual_pairs
     for pair in actual_pairs:
         if pair not in possible_pairs:
             raise ValueError(

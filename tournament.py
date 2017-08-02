@@ -74,10 +74,12 @@ def playerStandings():
                    player_name,
                    (SELECT COUNT(*) FROM matches WHERE player_id=winner_id) as wins,
                    (SELECT COUNT(*) FROM matches WHERE player_id=winner_id OR player_id=loser_id) as total_matches
-                   FROM players"""
+            FROM players
+            ORDER BY wins DESC"""
 
     cursor.execute(sql)
-    standings_list = cursor.fetchall()  # returns the standings list
+    # returns the standings list
+    standings_list = cursor.fetchall()  
     return standings_list
 
 
@@ -88,10 +90,8 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    # create a row in the 'matches' table, recording who won
     database = connect()
     cursor = database.cursor()
-
     cursor.execute("INSERT INTO matches (loser_id, winner_id) VALUES (%s, %s)", (loser, winner,))
     database.commit()
     database.close()
@@ -99,29 +99,21 @@ def reportMatch(winner, loser):
 
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-
-    Assuming that there are an even number of players registered, each player
-    appears exactly once in the pairings.  Each player is paired with another
-    player with an equal or nearly-equal win record, that is, a player adjacent
-    to him or her in the standings.
-
-    Returns:
-      A list of tuples, each of which contains (id1, name1, id2, name2)
-        id1: the first player's unique id
-        name1: the first player's name
-        id2: the second player's unique id
-        name2: the second player's name
     """
     database = connect()
     cursor = database.cursor()
 
-    # large query has been put into a var below
-    sql = """SELECT player_id,
-                   player_name,
-                   (SELECT COUNT(*) FROM matches WHERE player_id=winner_id) as wins,
-                   (SELECT COUNT(*) FROM matches WHERE player_id=winner_id OR player_id=loser_id) as total_matches
-                   FROM players"""
+    standings = playerStandings()
+    #confirm standings are correctly returned
+    print standings
+    pairings = []
+    player_count = countPlayers()
+    #for each entry in standings, select values from 0 to 1 and put them in a list
+    players = [i[0:2] for i in standings]
+    i = 0
 
-    cursor.execute(sql)
-    pairings_list = cursor.fetchall()  # returns the pairings list
-    return pairings_list
+    while i < player_count:
+        pair = players[i] + players[i+1]
+        pairings.append(pair)
+        i += 2
+    return pairings
